@@ -1,12 +1,44 @@
+
 package App::QuestionValidator;
 
-use 5.006;
+use v5.12;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
+use Text::CSV;
+
+sub load_question {
+    my ($filename) = @_;
+    my $csv = Text::CSV->new( { auto_diag => 1 } );
+    open( my $fh, "<", $filename);
+
+    my @data;
+    while( <$fh> ) {
+        next if $_ =~ qr{\s*//};
+       push  
+    }
+}
+
+sub is_multiple_choice {
+    my ($file) = @_;
+
+}
+
+sub count_answers { }
+
+sub count_correct { }
+
+sub count_incorrect { }
+
+sub validate_answer_points { }
+
+sub validate {
+
+    # This should basically be the main function.
+}
 
 =head1 NAME
 
-App::QuestionValidator - The great new App::QuestionValidator!
+App::QuestionValidator - Validates learn-style multiplechoice questions.
 
 =head1 VERSION
 
@@ -15,7 +47,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -138,4 +169,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of App::QuestionValidator
+1;    # End of App::QuestionValidator
