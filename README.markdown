@@ -1,4 +1,6 @@
-App-QuestionValidator
+question-validator is a program for validating the format of multiple
+choice questions in the learn format. It also gives advice on how to
+fix the problems found in the question file.
 
 Rules which must be followed by the questions.
   - All questions must be multiple choice questions with four possible answers.
@@ -7,7 +9,7 @@ Rules which must be followed by the questions.
   - One question may give zero to fifty percent of the points.
   - The question must be compelling, and the right answer should be non-obvious.
 
-INSTALLATION
+# INSTALLATION
 
 To install this module, run the following commands:
 
@@ -16,7 +18,11 @@ To install this module, run the following commands:
 	make test
 	make install
 
-SUPPORT AND DOCUMENTATION
+Or you may run cpan on the directory:
+
+    cpan App-QuestionValidator
+
+# SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
 perldoc command.
@@ -25,7 +31,7 @@ perldoc command.
     perldoc question-validator
     perldoc App::QuestionValidator
 
-LICENSE AND COPYRIGHT
+# LICENSE AND COPYRIGHT
 
 Copyright (C) 2013 Jean-Christophe Petkovich
 
@@ -33,7 +39,7 @@ This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a
 copy of the full license at:
 
-L<http://www.perlfoundation.org/artistic_license_2_0>
+* <http://www.perlfoundation.org/artistic_license_2_0>
 
 Any use, modification, and distribution of the Standard or Modified
 Versions is governed by this Artistic License. By using, modifying or
