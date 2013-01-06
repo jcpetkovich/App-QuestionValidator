@@ -25,11 +25,16 @@ Or you may run cpan on the directory:
 # SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
-perldoc command.
+perldoc command:
 
 
     perldoc question-validator
     perldoc App::QuestionValidator
+
+Or with the man command:
+
+    man question-validator
+    man App::QuestionValidator
 
 # LICENSE AND COPYRIGHT
 
