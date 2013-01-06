@@ -8,8 +8,55 @@ use Carp;
 use Text::CSV;
 use Exporter 'import';
 
-our @EXPORT = qw( load_question is_multiple_choice count_answers count_correct
-  count_incorrect validate_answer_points validate );
+
+=head1 NAME
+
+App::QuestionValidator - Validates learn-style multiplechoice questions.
+
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
+
+=head1 SYNOPSIS
+
+If you are looking for a commandline interface, you should look at
+B<question-validator.pl>.
+
+This module supplies the necessary functions for validating learn
+style multiple choice questions.
+
+    use App::QuestionValidator;
+
+    my $fields = load_question('question.csv');
+    if ( "Question OK" eq validate($fields) ) {
+        say "Valid!";
+    }
+    ...
+
+=head1 EXPORT
+
+load_question validate
+
+=cut
+
+our @EXPORT = qw( load_question validate );
+our @EXPORT_OK = qw( is_multiple_choice count_answers count_correct
+  count_incorrect validate_answer_points );
+
+=head1 SUBROUTINES/METHODS
+
+=head2 load_question
+
+Load csv formatted question into memory.
+
+Takes filename as an argument and returns an array reference to the
+rows.
+
+=cut
 
 sub load_question {
     my ($filename) = @_;
@@ -21,12 +68,34 @@ sub load_question {
     return $fields;
 }
 
+=head2 is_multiple_choice
+
+This function checks to make sure the question is properly marked as
+multiple choice.
+
+=cut
+
 sub is_multiple_choice {
     my ($fields) = @_;
 
     # First row second column indicates the question type.
     return $fields->[0][1] eq "MC";
 }
+
+=head2 count_row_pattern
+
+This function uses a test on each row. A count of the number of rows
+for which the test evaluates to true is returned. Takes a reference to
+an array of rows.
+
+Example:
+
+    count_row_pattern { $_->[0] eq "Option" } $fields;
+
+This would return the number of rows for which the first column
+contains "Option".
+
+=cut
 
 sub count_row_pattern (&$) {
     my ( $CODE, $fields ) = @_;
@@ -40,11 +109,24 @@ sub count_row_pattern (&$) {
     return $count;
 }
 
+=head2 count_answers
+
+This will count the number of options in the question.
+
+=cut
+
 sub count_answers {
     my ($fields) = @_;
 
     count_row_pattern { $_->[0] eq "Option" } $fields;
 }
+
+=head2 count_correct
+
+This will count the number of options that are considered completely
+correct (worth 100% of the points).
+
+=cut
 
 sub count_correct {
     my ($fields) = @_;
@@ -52,11 +134,25 @@ sub count_correct {
     count_row_pattern { $_->[0] eq "Option" && $_->[1] == 100 } $fields;
 }
 
+=head2 count_incorrect
+
+This will count the number of options that are considered completely
+incorrect.
+
+=cut 
+    
 sub count_incorrect {
     my ($fields) = @_;
 
     count_row_pattern { $_->[0] eq "Option" && $_->[1] == 0 } $fields;
 }
+
+=head2 validate_answer_points
+
+This will ensure that no more than 2 options have a value of greater
+than 50% of the marks.
+
+=cut
 
 sub validate_answer_points {
     my ($fields) = @_;
@@ -66,6 +162,13 @@ sub validate_answer_points {
 
     return $opt_with_points <= 2;
 }
+
+
+=head2 validate
+
+Validate the supplied question.
+
+=cut
 
 sub validate {
     my ($fields) = @_;
@@ -106,62 +209,14 @@ sub validate {
     # This should basically be the main function.
 }
 
-=head1 NAME
-
-App::QuestionValidator - Validates learn-style multiplechoice questions.
-
-=head1 VERSION
-
-Version 0.01
-
-=cut
-
-our $VERSION = '0.01';
-
-=head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use App::QuestionValidator;
-
-    my $foo = App::QuestionValidator->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
-
 =head1 AUTHOR
 
-Jean-Christophe Petkovich, C<< <jcpetkovich at gmail.com> >>
+Jean-Christophe Petkovich, <jcpetkovich@gmail.com>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-app-questionvalidator at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=App-QuestionValidator>.  I will be notified, and then you'll
+Please report any bugs or feature requests to <jcpetkovich@gmail.com>, I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
@@ -169,32 +224,7 @@ You can find documentation for this module with the perldoc command.
 
     perldoc App::QuestionValidator
 
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-QuestionValidator>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/App-QuestionValidator>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/App-QuestionValidator>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/App-QuestionValidator/>
-
-=back
-
-
 =head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 

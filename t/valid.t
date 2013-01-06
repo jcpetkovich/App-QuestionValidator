@@ -9,8 +9,9 @@
 
 #########################
 
-use Test::More qw( no_plan );
-BEGIN { use_ok(App::QuestionValidator); }
+use Test::More tests => 6;
+use App::QuestionValidator qw( load_question is_multiple_choice count_answers count_correct
+  count_incorrect validate_answer_points validate );
 
 my $valid_data = load_question('t/valid.csv');
 
@@ -21,5 +22,3 @@ is( count_incorrect($valid_data), 2, "Check at least 2 incorrect exist." );
 ok( validate_answer_points($valid_data), "Enforce point rules." );
 
 is( validate($valid_data), "Question OK", "Valid csv correctly validated." );
-
-done_testing();
