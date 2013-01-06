@@ -1,0 +1,12 @@
+newquestion,FC,,
+title,Basic Arithmetic,,
+questiontext,"What is the result of this mathematical operation
+1 + 1 = ? 
+Use a decimal base."
+Option,50,11,"Incorrect answer. Revisit your basic math skills."
+Option,50,11,"Incorrect answer. Revisit your basic math skills."
+Option,100,3,"The question was phrased in the decimal system."
+Option,100,3,"The question was phrased in the decimal system."
+Option,100,3,"The question was phrased in the decimal system."
+option,100,2,,"Correct."
+Feedback,"Adding numbers is an essential skill. MATH 115 and MATH 117",,,,

@@ -9,7 +9,8 @@ WriteMakefile(
     VERSION_FROM     => 'lib/App/QuestionValidator.pm',
     ABSTRACT_FROM    => 'lib/App/QuestionValidator.pm',
     LICENSE          => 'Artistic_2_0',
-    PL_FILES         => {},
+    PL_FILES         => { },
+    EXE_FILES        => [ 'question-validator' ],
     MIN_PERL_VERSION => 5.006,
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
@@ -18,9 +19,10 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'Text::CSV' => 1.15,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'App-QuestionValidator-*' },
+    clean => {
+        FILES => 'App-QuestionValidator-* *.log',
+    },
 );

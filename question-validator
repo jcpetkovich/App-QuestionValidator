@@ -1,0 +1,70 @@
+#!/usr/bin/perl -w
+# question-validator --- Checks if a submitted question is valid.
+# Author: Jean-Christophe Petkovich <jcpetkovich@gmail.com>
+# Created: 05 Jan 2013
+# Version: 0.01
+
+use v5.12;
+use warnings;
+use strict;
+use Getopt::Long qw( :config auto_help );
+use IO::File;
+use App::QuestionValidator;
+use autodie;
+
+GetOptions();
+
+my $fh = IO::File->new();
+
+if ( @ARGV == 0 ) {
+    $fh->fdopen(fileno(STDIN),'r');
+    my $fields = load_question($fh);
+    validate($fields);
+
+} else {
+    for (@ARGV) {
+        if (-r $_) {
+            $fh->open($_, 'r');
+            my $fields = load_question($fh);
+            validate($fields);
+        }
+    }
+}
+
+__END__
+
+=head1 NAME
+
+question-validator - Validate learn multiple choice questions.
+
+=head1 SYNOPSIS
+
+B<question-validator> [options] [files]
+
+      -h --help      Print this help documentation.
+
+=head1 DESCRIPTION
+
+B<question-validator> takes a list of files to validate one by one, or
+can have a question csv piped to it from the commandline.
+
+Keep running the validator on the question and fix the first error
+that appears until B<question-validator> returns no errors.
+
+=head1 AUTHOR
+
+Jean-Christophe Petkovich, E<lt>jcpetkovich@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 by Jean-Christophe Petkovich
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.2 or,
+at your option, any later version of Perl 5 you may have available.
+
+=head1 BUGS
+
+None reported... yet.
+
+=cut
