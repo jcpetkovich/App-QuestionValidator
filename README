@@ -1,11 +1,11 @@
 App-QuestionValidator
 
 Rules which must be followed by the questions.
-- All questions must be multiple choice questions with four possible answers.
-- At most one answer must give full points.
-- At least two answers must give zero points.
-- One question may give zero to fifty percent of the points.
-- The question must be compelling, and the right answer should be non-obvious.
+  - All questions must be multiple choice questions with four possible answers.
+  - At most one answer must give full points.
+  - At least two answers must give zero points.
+  - One question may give zero to fifty percent of the points.
+  - The question must be compelling, and the right answer should be non-obvious.
 
 INSTALLATION
 
@@ -22,7 +22,7 @@ After installing, you can find documentation for this module with the
 perldoc command.
 
 
-    perldoc question-validator.pl
+    perldoc question-validator
     perldoc App::QuestionValidator
 
 LICENSE AND COPYRIGHT
