@@ -12,14 +12,14 @@
 use Test::More qw( no_plan );
 BEGIN { use_ok(App::QuestionValidator); }
 
-my @valid_data = load_question('valid.csv');
+my $valid_data = load_question('t/valid.csv');
 
-ok( is_multiple_choice(@valid_data), "Multiple choice check." );
-is( count_answers(@valid_data),   4, "Enforce 4 answers." );
-is( count_correct(@valid_data),   1, "Check only 1 correct answer exists." );
-is( count_incorrect(@valid_data), 2, "Check at least 2 incorrect exist." );
-ok( validate_answer_points(@valid_data), "Enforce point rules." );
+ok( is_multiple_choice($valid_data), "Multiple choice check." );
+is( count_answers($valid_data),   4, "Enforce 4 answers." );
+is( count_correct($valid_data),   1, "Check only 1 correct answer exists." );
+is( count_incorrect($valid_data), 2, "Check at least 2 incorrect exist." );
+ok( validate_answer_points($valid_data), "Enforce point rules." );
 
-is( validate(@valid_data), "Question OK", "Valid csv correctly validated." );
+is( validate($valid_data), "Question OK", "Valid csv correctly validated." );
 
 done_testing();

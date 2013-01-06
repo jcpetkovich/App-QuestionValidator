@@ -4,35 +4,105 @@ package App::QuestionValidator;
 use v5.12;
 use strict;
 use warnings;
+use Carp;
 use Text::CSV;
+use Exporter 'import';
+
+our @EXPORT = qw( load_question is_multiple_choice count_answers count_correct
+  count_incorrect validate_answer_points validate );
 
 sub load_question {
     my ($filename) = @_;
-    my $csv = Text::CSV->new( { auto_diag => 1 } );
-    open( my $fh, "<", $filename);
 
-    my @data;
-    while( <$fh> ) {
-        next if $_ =~ qr{\s*//};
-       push  
-    }
+    my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
+    open( my $fh, "<", $filename );
+    my $fields = $csv->getline_all($fh);
+
+    return $fields;
 }
 
 sub is_multiple_choice {
-    my ($file) = @_;
+    my ($fields) = @_;
 
+    # First row second column indicates the question type.
+    return $fields->[0][1] eq "MC";
 }
 
-sub count_answers { }
+sub count_row_pattern (&$) {
+    my ( $CODE, $fields ) = @_;
 
-sub count_correct { }
+    my $count;
+    for $_ (@$fields) {
+        if ( $CODE->() ) {
+            $count++;
+        }
+    }
+    return $count;
+}
 
-sub count_incorrect { }
+sub count_answers {
+    my ($fields) = @_;
 
-sub validate_answer_points { }
+    count_row_pattern { $_->[0] eq "Option" } $fields;
+}
+
+sub count_correct {
+    my ($fields) = @_;
+
+    count_row_pattern { $_->[0] eq "Option" && $_->[1] == 100 } $fields;
+}
+
+sub count_incorrect {
+    my ($fields) = @_;
+
+    count_row_pattern { $_->[0] eq "Option" && $_->[1] == 0 } $fields;
+}
+
+sub validate_answer_points {
+    my ($fields) = @_;
+
+    my $opt_with_points =
+      count_row_pattern { $_->[0] eq "Option" && $_->[1] > 50 } $fields;
+
+    return $opt_with_points <= 2;
+}
 
 sub validate {
+    my ($fields) = @_;
 
+    my $status = "Question OK";
+
+    unless ( is_multiple_choice($fields) ) {
+
+        carp "Question marked as something "
+          . "other than multiple choice, please remedy this.";
+        $status = "Not OK";
+    }
+
+    unless ( count_answers($fields) == 4 ) {
+
+        carp "There should be 4 answers to your multiple choice question.";
+        $status = "Not OK";
+    }
+
+    unless ( count_correct($fields) == 1 ) {
+
+        carp "There Should be one and only one fully correct answer.";
+        $status = "Not OK";
+    }
+
+    unless ( count_incorrect($fields) >= 2 ) {
+
+        carp "There should be between 2 and 3 incorrect answers.";
+        $status = "Not OK";
+    }
+    unless ( validate_answer_points($fields) ) {
+
+        carp "There should be no more than two options worth more than 50%";
+        $status = "Not OK";
+    }
+
+    return $status;
     # This should basically be the main function.
 }
 
