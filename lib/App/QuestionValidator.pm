@@ -298,7 +298,7 @@ sub non_empty_feedback {
 
     for my $option (@options) {
 
-        my $check = not ($option->[$OPTION_FEEDBACK] || '') =~ /^\s*$/;
+        my $check = not( $option->[$OPTION_FEEDBACK] || '' ) =~ /^\s*$/;
         $status &&= $check;
         unless ($check) {
             push @TROUBLE_ROWS, $option;
@@ -306,6 +306,28 @@ sub non_empty_feedback {
     }
 
     return $status;
+}
+
+=head2 good_tag_and_size
+
+This function checks whether or not a tag and size requirement is met
+by a simple learn entry.
+
+=cut
+
+sub good_tag_and_size {
+    my ( $ROW_NUM, $tag, $size, $fields ) = @_;
+
+    @TROUBLE_ROWS = ();
+
+    my $type_row = $fields->[$ROW_NUM];
+
+    # The first row must have $size columns, the first of which must
+    # contain the correct tag $tag
+    my $status = @$type_row - 1 == $size && $type_row->[$ROW_TAG] eq $tag;
+    push @TROUBLE_ROWS, $type_row;
+    return $status;
+
 }
 
 =head2 good_type
@@ -316,17 +338,7 @@ proper format.
 =cut
 
 sub good_type {
-    my ($fields) = @_;
-
-    @TROUBLE_ROWS = ();
-
-    my $type_row = $fields->[$TYPE_ROW];
-
-    # The first row must have 3 columns, the first of which must
-    # contain NewQuestion
-    my $status = @$type_row - 1 == 3 && $type_row->[$ROW_TAG] eq "NewQuestion";
-    push @TROUBLE_ROWS, $type_row;
-    return $status;
+    good_tag_and_size( $TYPE_ROW, "NewQuestion", 3, @_ );
 }
 
 =head2 good_title
@@ -337,19 +349,7 @@ proper format.
 =cut
 
 sub good_title {
-    my ($fields) = @_;
-
-    @TROUBLE_ROWS = ();
-
-    my $title_row = $fields->[$TITLE_ROW];
-
-    # The first row must have 3 columns, the first of which must
-    # contain Title
-    my $status = @$title_row - 1 == 3 && $title_row->[$ROW_TAG] eq "Title";
-
-    push @TROUBLE_ROWS, $title_row;
-
-    return $status;
+    good_tag_and_size( $TITLE_ROW, "Title", 3, @_ );
 }
 
 =head2 good_option_cols
@@ -520,7 +520,8 @@ sub validate {
     unless ( validate_answer_points($fields) ) {
         $status = 0;
 
-        say_error "Only up to two options may be worth more than or equal to 50.";
+        say_error
+          "Only up to two options may be worth more than or equal to 50.";
     }
 
     unless ( good_type($fields) ) {

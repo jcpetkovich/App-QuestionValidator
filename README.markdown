@@ -11,30 +11,42 @@ Rules which must be followed by the questions.
 
 # INSTALLATION
 
-To install this module, run the following commands:
+To install this module, run cpan on the directory after cloning the
+repository:
+
+    cpan App-QuestionValidator
+
+Or you may run the following on a cloned repository:
 
 	perl Makefile.PL
 	make
 	make test
 	make install
 
-Or you may run cpan on the directory:
+If you wish to install this module without root permissions I suggest
+setting up a local cpan directory using
+[local::lib](https://metacpan.org/module/local::lib). Follow its
+install instructions and then any module you install using cpan as a
+regular user will appear in your home directory under ~/perl5 (by
+default).
 
-    cpan App-QuestionValidator
+# DEPENDENCIES 
+
+The package only requires Text::CSV > 1.15 which should be installed
+automatically by cpan. 
 
 # SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
-perldoc command:
-
-
-    perldoc question-validator
-    perldoc App::QuestionValidator
-
-Or with the man command:
+man command:
 
     man question-validator
     man App::QuestionValidator
+
+Or with the perldoc command:
+
+    perldoc question-validator
+    perldoc App::QuestionValidator
 
 # LICENSE AND COPYRIGHT
 
