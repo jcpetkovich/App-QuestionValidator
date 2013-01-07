@@ -25,7 +25,7 @@ Or you may run the following on a cloned repository:
 
 If you wish to install this module without root permissions I suggest
 setting up a local cpan directory using
-[local::lib][https://metacpan.org/module/local::lib]. Follow it's
+[local::lib](https://metacpan.org/module/local::lib). Follow it's
 install instructions and then any module you install using cpan as a
 regular user will appear in your home directory under ~/perl5 (by
 default).
