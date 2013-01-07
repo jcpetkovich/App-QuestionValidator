@@ -94,6 +94,12 @@ This will print to stderr
 
 =cut
 
+=head2 say_stderr
+
+Function that prints gcc style messages to stderr.
+
+=cut
+
 sub say_stderr {
     my ( $type, @text ) = @_;
 
@@ -103,11 +109,23 @@ sub say_stderr {
 
 }
 
+=head2 say_error
+
+Function that prints gcc style errors to stderr.
+
+=cut
+
 sub say_error {
     my @error_text = @_;
 
     say_stderr( "error", @error_text );
 }
+
+=head2 say_note
+
+Function that prints gcc style notes to stderr.
+
+=cut
 
 sub say_note {
     my @error_text = @_;
