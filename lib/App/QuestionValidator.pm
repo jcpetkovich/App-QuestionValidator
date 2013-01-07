@@ -51,6 +51,7 @@ our @EXPORT_OK = qw( is_multiple_choice count_answers count_correct
   count_incorrect validate_answer_points good_type good_title
   good_option_format good_question_text non_empty_feedback
   good_option_cols good_option_placeholders good_option_tag );
+our $FILENAME = 'question-validator';
 
 =head1 GLOBALS
 
@@ -97,7 +98,7 @@ sub say_stderr {
     my ( $type, @text ) = @_;
 
     for (@TROUBLE_ROWS) {
-        say STDERR "$0:", $_->[0], ":0: $type: ", @text;
+        say STDERR "$FILENAME:", $_->[0], ":0: $type: ", @text;
     }
 
 }

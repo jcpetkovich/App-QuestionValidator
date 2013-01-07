@@ -26,6 +26,7 @@ if ( @ARGV == 0 ) {
         if (-r $_) {
             $fh->open($_, 'r');
 
+            $App::QuestionValidator::FILENAME = $_;
             say "Opening file $_ for scrutiny:";
             my $fields = load_question($fh);
             validate($fields);
