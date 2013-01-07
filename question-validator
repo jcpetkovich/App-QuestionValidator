@@ -25,6 +25,8 @@ if ( @ARGV == 0 ) {
     for (@ARGV) {
         if (-r $_) {
             $fh->open($_, 'r');
+
+            say "Opening file $_ for scrutiny:";
             my $fields = load_question($fh);
             validate($fields);
         }

@@ -8,6 +8,10 @@ use Carp;
 use Text::CSV;
 use Exporter 'import';
 
+# test.c: In function ‘main’:
+# test.c:7:5: error: ‘printhi’ undeclared (first use in this function)
+# test.c:7:5: note: each undeclared identifier is reported only once for each function it appears in
+
 =head1 NAME
 
 App::QuestionValidator - Validates learn-style multiplechoice questions.
@@ -55,6 +59,16 @@ Don't touch these unless you know that you need to.
 =cut
 
 our @TROUBLE_ROWS;
+our $ROW_TAG         = 1;
+our $OPTION_VALUE    = 2;
+our $QUESTION_TYPE   = 0;
+our $TYPE_VALUE      = 2;
+our $OPTION_FEEDBACK = 5;
+our $PLACEHOLDER     = 4;
+our $TYPE_ROW        = 0;
+our $TITLE_ROW       = 1;
+our $QUESTION_ROW    = 2;
+our $QUESTION_TEXT   = 2;
 
 =head1 SUBROUTINES/METHODS
 
@@ -73,16 +87,31 @@ sub row_to_string {
     return $csv->string();
 }
 
-=head2 dump_trouble_rows
+=head2 print_stderr
 
-This should print the rows which are causing trouble.
+This will print to stderr 
 
 =cut
 
-sub dump_trouble_rows {
+sub say_stderr {
+    my ( $type, @text ) = @_;
+
     for (@TROUBLE_ROWS) {
-        say STDERR "    ", row_to_string($_);
+        say STDERR "$0:", $_->[0], ":0: $type: ", @text;
     }
+
+}
+
+sub say_error {
+    my @error_text = @_;
+
+    say_stderr( "error", @error_text );
+}
+
+sub say_note {
+    my @error_text = @_;
+
+    say_stderr( "note", @error_text );
 }
 
 =head2 load_question
@@ -98,7 +127,14 @@ sub load_question {
     my ($fh) = @_;
 
     my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
-    my $fields = $csv->getline_all($fh);
+
+    my $fields = [];
+    while ( my $row = $csv->getline($fh) ) {
+        unshift @$row, $fh->input_line_number();
+        push @$fields, $row;
+    }
+
+    # my $fields = $csv->getline_all($fh);
 
     return $fields;
 }
@@ -117,9 +153,9 @@ sub is_multiple_choice {
 
     # First row second column indicates the question type.
 
-    my $status = $fields->[0][1] eq "MC";
+    my $status = $fields->[$QUESTION_TYPE][$TYPE_VALUE] eq "MC";
 
-    push @TROUBLE_ROWS, $fields->[0] unless $status;
+    push @TROUBLE_ROWS, $fields->[$QUESTION_TYPE] unless $status;
 
     return $status;
 }
@@ -163,7 +199,9 @@ sub count_answers {
 
     @TROUBLE_ROWS = ();
 
-    count_row_pattern { $_->[0] eq "Option" } $fields;
+    my $r = count_row_pattern { $_->[$ROW_TAG] eq "Option" } $fields;
+    splice @TROUBLE_ROWS, 0, 4;
+    return $r;
 }
 
 =head2 count_correct
@@ -178,7 +216,13 @@ sub count_correct {
 
     @TROUBLE_ROWS = ();
 
-    count_row_pattern { $_->[0] eq "Option" && $_->[1] == 100 } $fields;
+    my $r = count_row_pattern {
+        $_->[$ROW_TAG] eq "Option" && $_->[$OPTION_VALUE] == 100;
+    }
+    $fields;
+
+    shift @TROUBLE_ROWS;
+    return $r;
 }
 
 =head2 count_incorrect
@@ -193,7 +237,8 @@ sub count_incorrect {
 
     @TROUBLE_ROWS = ();
 
-    count_row_pattern { $_->[0] eq "Option" && $_->[1] == 0 } $fields;
+    count_row_pattern { $_->[$ROW_TAG] eq "Option" && $_->[$OPTION_VALUE] == 0 }
+    $fields;
 }
 
 =head2 validate_answer_points
@@ -208,9 +253,12 @@ sub validate_answer_points {
 
     @TROUBLE_ROWS = ();
 
-    my $opt_with_points =
-      count_row_pattern { $_->[0] eq "Option" && $_->[1] > 0 } $fields;
+    my $opt_with_points = count_row_pattern {
+        $_->[$ROW_TAG] eq "Option" && $_->[$OPTION_VALUE] > 0;
+    }
+    $fields;
 
+    splice @TROUBLE_ROWS, 0, 2;
     return $opt_with_points <= 2;
 }
 
@@ -227,11 +275,11 @@ sub non_empty_feedback {
     @TROUBLE_ROWS = ();
 
     my $status = 1;
-    my @options = grep { $_->[0] eq "Option" } @$fields;
+    my @options = grep { $_->[$ROW_TAG] eq "Option" } @$fields;
 
     for my $option (@options) {
 
-        my $check = not $option->[4] =~ /^\s*$/;
+        my $check = not ($option->[$OPTION_FEEDBACK] || '') =~ /^\s*$/;
         $status &&= $check;
         unless ($check) {
             push @TROUBLE_ROWS, $option;
@@ -253,11 +301,11 @@ sub good_type {
 
     @TROUBLE_ROWS = ();
 
-    my $type_row = $fields->[0];
+    my $type_row = $fields->[$TYPE_ROW];
 
     # The first row must have 3 columns, the first of which must
     # contain NewQuestion
-    my $status = @$type_row == 3 && $type_row->[0] eq "NewQuestion";
+    my $status = @$type_row - 1 == 3 && $type_row->[$ROW_TAG] eq "NewQuestion";
     push @TROUBLE_ROWS, $type_row;
     return $status;
 }
@@ -274,11 +322,11 @@ sub good_title {
 
     @TROUBLE_ROWS = ();
 
-    my $title_row = $fields->[1];
+    my $title_row = $fields->[$TITLE_ROW];
 
     # The first row must have 3 columns, the first of which must
     # contain Title
-    my $status = @$title_row == 3 && $title_row->[0] eq "Title";
+    my $status = @$title_row - 1 == 3 && $title_row->[$ROW_TAG] eq "Title";
 
     push @TROUBLE_ROWS, $title_row;
 
@@ -300,13 +348,13 @@ sub good_option_cols {
     # Correct format until proven guilty... er... I mean correct.
     my $status = 1;
 
-    my @options = grep { $_->[0] eq "Option" } @$fields;
+    my @options = grep { $_->[$ROW_TAG] eq "Option" } @$fields;
 
     for my $option (@options) {
 
         # The first row must have 5 columns, the first of which must
         # contain Option
-        my $check = @$option == 5;
+        my $check = @$option - 1 == 5;
         $status &&= $check;
         unless ($check) {
             push @TROUBLE_ROWS, $option;
@@ -332,13 +380,13 @@ sub good_option_placeholders {
     # Correct format until proven guilty... er... I mean correct.
     my $status = 1;
 
-    my @options = grep { $_->[0] eq "Option" } @$fields;
+    my @options = grep { $_->[$ROW_TAG] eq "Option" } @$fields;
 
     for my $option (@options) {
 
         # There should be empty placeholders for learn (for reasons
         # that I cannot fathom).
-        my $check = $option->[3] =~ /^\s*$/;
+        my $check = $option->[$PLACEHOLDER] =~ /^\s*$/;
         $status &&= $check;
         unless ($check) {
             push @TROUBLE_ROWS, $option;
@@ -368,10 +416,10 @@ sub good_option_tag {
 
     # Search for things that look like an options but which may not
     # necessarily be labeled as such.
-    my @options = grep { @$_ == 5 } @$fields;
+    my @options = grep { @$_ - 1 == 5 } @$fields;
 
     for my $option (@options) {
-        unless ( $status &&= $option->[0] eq "Option" ) {
+        unless ( $status &&= $option->[$ROW_TAG] eq "Option" ) {
             push @TROUBLE_ROWS, $option;
         }
     }
@@ -389,8 +437,9 @@ sub good_question_cols {
     my ($fields) = @_;
     @TROUBLE_ROWS = ();
 
-    my $status = @{ $fields->[2] } == 3 && $fields->[2][0] eq "QuestionText";
-    push @TROUBLE_ROWS, $fields->[2];
+    my $status = @{ $fields->[$QUESTION_ROW] } - 1 == 3
+      && $fields->[$QUESTION_ROW][$ROW_TAG] eq "QuestionText";
+    push @TROUBLE_ROWS, $fields->[$QUESTION_ROW] unless $status;
     return $status;
 }
 
@@ -409,8 +458,8 @@ sub good_question_text {
     # Check that the question text has a newline at the very beginning
     # and at the very end.
 
-    my $status = $fields->[2][1] =~ /\A\n.*\n\z/ms;
-    push @TROUBLE_ROWS, $fields->[2];
+    my $status = $fields->[$QUESTION_ROW][$QUESTION_TEXT] =~ /\A\n.*\n\z/ms;
+    push @TROUBLE_ROWS, $fields->[$QUESTION_ROW] unless $status;
     return $status;
 }
 
@@ -428,113 +477,84 @@ sub validate {
     unless ( is_multiple_choice($fields) ) {
         $status = 0;
 
-        say STDERR "\nQuestion marked as something "
-          . "other than multiple choice. Fix:";
-        dump_trouble_rows;
+        say_error "Question set as something other than MC.";
     }
 
     unless ( count_answers($fields) == 4 ) {
         $status = 0;
 
-        say STDERR
-          "\nThere should be 4 answers to your multiple choice question"
-          . " (check for mispellings of \"Option\"). Found:\n";
-        dump_trouble_rows;
+        say_error "Exactly four options are required.";
     }
 
     unless ( count_correct($fields) == 1 ) {
         $status = 0;
 
-        say STDERR
-          "\nThere Should be one and only one fully correct answer. Found:\n";
-        dump_trouble_rows;
-
+        say_error "Exactly one fully correct answer is required.";
     }
 
     unless ( count_incorrect($fields) >= 2 ) {
         $status = 0;
 
-        say STDERR
-          "\nThere should be between 2 and 3 incorrect answers. Found only:\n";
-        dump_trouble_rows;
+        say_error "Between 2 and 3 incorrect answers are required.";
     }
 
     unless ( validate_answer_points($fields) ) {
         $status = 0;
 
-        say STDERR "\nThere should be no more than two options worth more "
-          . "than 50%. Found:\n";
-        dump_trouble_rows;
+        say_error "Only up to two options may be worth more than or equal to 50.";
     }
 
     unless ( good_type($fields) ) {
         $status = 0;
 
-        say STDERR "\nThe row defining the type of the question should start "
-          . "with \"NewQuestion\" and have 3 columns. Found:\n";
-        dump_trouble_rows;
+        say_error
+"The type row should have the tag \"NewQuestion\" and should be of size 3";
     }
 
     unless ( good_title($fields) ) {
         $status = 0;
 
-        say STDERR "\nThe row defining the title of the question should start "
-          . "with \"Title\" and have 3 columns. Found:\n";
-        dump_trouble_rows;
+        say_error
+          "The title row should have the tag \"Title\" and should be of size 3";
     }
 
     unless ( good_option_cols($fields) ) {
         $status = 0;
 
-        say STDERR "\nEach option should have 5 columns. Fix the following:\n";
-        dump_trouble_rows;
+        say_error "Each option should have 5 columns.";
     }
 
     unless ( good_option_placeholders($fields) ) {
         $status = 0;
 
-        say STDERR <<COMMENT;
-
-Each option's fourth column should be empty (see example in manual),
-it's a placeholder for learn's stuff, don't ask me why they did it
-this way. Offending lines:
-COMMENT
-        dump_trouble_rows;
+        say_error
+"Each option's fourth column should be empty (see example in manual), it's a placeholder for learn's stuff, don't ask me why they did it this way.";
     }
 
     unless ( non_empty_feedback($fields) ) {
         $status = 0;
 
-        say STDERR "\nThere should be non-empty feedback for every option. "
-          . "Double check these:\n";
-        dump_trouble_rows;
+        say_error "Feedback required for every option.";
     }
 
     unless ( good_option_tag($fields) ) {
         $status = 0;
 
-        say STDERR "\nEach option field should start with \"Option\". Found:\n";
-        dump_trouble_rows;
+        say_error "Each option row should start with \"Option\".";
     }
 
     unless ( good_question_cols($fields) ) {
         $status = 0;
 
-        say STDERR "\nThe question row should start with \"QuestionText\" and have 3 columns. Found:\n";
-        dump_trouble_rows;
+        say_error
+"The question row should start with \"QuestionText\" and have 3 columns.";
     }
 
     unless ( good_question_text($fields) ) {
         $status = 0;
 
-        say STDERR <<COMMENT;
-
-OPTIONAL: I suggest putting a newline at the very beginning of your
-question text, and also at the very end. If you do not put newlines at
-the beginning and the end of the string, learn will not treat your
-newlines literally, and will format your question as it sees fit.
-COMMENT
-        dump_trouble_rows;
+        say_note
+"I suggest putting a newline at the very beginning of your question text, and also at the very end. If you do not put newlines at the beginning and the end of the string, learn will not treat your newlines literally, and will format your question as it sees fit.";
     }
 
     return $status;
