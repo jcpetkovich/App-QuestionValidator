@@ -48,6 +48,20 @@ Or with the perldoc command:
     perldoc question-validator
     perldoc App::QuestionValidator
 
+
+# ISSUE TRACKING
+
+Please use github's issue tracker to report issues with the
+application. If this is for some reason not possible please email me
+with a detailed bug report.
+
+When reporting a bug using either the issue tracker or email please
+include the hash ref of the version of this module that you're
+using. A hash ref can be obtained using:
+
+    git rev-parse --short HEAD
+
+
 # LICENSE AND COPYRIGHT
 
 Copyright (C) 2013 Jean-Christophe Petkovich
