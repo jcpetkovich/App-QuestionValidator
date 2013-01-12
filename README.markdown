@@ -11,17 +11,11 @@ Rules which must be followed by the questions.
 
 # INSTALLATION
 
-To install this module, run cpan on the directory after cloning the
-repository:
-
-    cpan App-QuestionValidator
-
-Or you may run the following on a cloned repository:
-
+To install this module run the following on a cloned repository:
+	sudo cpan Text::CSV
 	perl Makefile.PL
 	make
-	make test
-	make install
+	sudo make install
 
 If you wish to install this module without root permissions I suggest
 setting up a local cpan directory using
