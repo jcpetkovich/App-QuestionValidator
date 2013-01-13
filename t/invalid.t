@@ -12,9 +12,6 @@
 use Test::More tests => 14;
 use App::QuestionValidator;
 
-# Suppress error output.
-open( STDERR, ">", 'invalid.log');
-
 my $fh = IO::File->new('t/invalid.csv', 'r');
 my $valid_data = load_question($fh);
 

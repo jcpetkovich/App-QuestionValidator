@@ -1,6 +1,6 @@
-question-validator is a program for validating the format of multiple
-choice questions in the learn format. It also gives advice on how to
-fix the problems found in the question file.
+*question-validator* is a program for validating the format of
+multiple choice questions in the learn format. It also gives advice on
+how to fix the problems found in the question file.
 
 Rules which must be followed by the questions.
   - All questions must be multiple choice questions with four possible answers.
@@ -9,31 +9,43 @@ Rules which must be followed by the questions.
   - One question may give zero to fifty percent of the points.
   - The question must be compelling, and the right answer should be non-obvious.
 
+# DEPENDENCIES 
+
+The package only requires Text::CSV > 1.15 which should be installed
+automatically by cpan. 
+
 # INSTALLATION
 
-To install this module, run cpan on the directory after cloning the
-repository:
+To install this module, run cpan on the *directory* not simply the
+name of the module (which would be App::QuestionValidator). To
+download the module it is recommended that you use git clone:
 
-    cpan App-QuestionValidator
+    git clone https://github.com/jcpetkovich/App-QuestionValidator.git
+    cpan ./App-QuestionValidator
 
-Or you may run the following on a cloned repository:
+Please take extra care to ensure that you are running cpan with the
+*directory* of the module as it's argument.
 
+An alternative to using cpan to install the package is to install the
+dependencies of the module and then the module itself with make. You
+may install the dependencies of the module with either cpan or your
+system's package manager.
+
+    cpan Text::CSV
+
+    git clone https://github.com/jcpetkovich/App-QuestionValidator.git
+    cd App-QuestionValidator
 	perl Makefile.PL
 	make
 	make test
 	make install
 
 If you wish to install this module without root permissions I suggest
-setting up a local cpan directory using
+setting up a user cpan directory using
 [local::lib](https://metacpan.org/module/local::lib). Follow its
 install instructions and then any module you install using cpan as a
 regular user will appear in your home directory under ~/perl5 (by
 default).
-
-# DEPENDENCIES 
-
-The package only requires Text::CSV > 1.15 which should be installed
-automatically by cpan. 
 
 # SUPPORT AND DOCUMENTATION
 
