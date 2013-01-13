@@ -9,10 +9,10 @@
 
 #########################
 
-use Test::More tests => 14;
+use Test::More tests => 16;
 use App::QuestionValidator;
 
-my $fh = IO::File->new('t/invalid.csv', 'r');
+my $fh = new IO::File 't/invalid.csv', 'r';
 my $valid_data = load_question($fh);
 
 # Tests associated with the rules
@@ -31,6 +31,8 @@ ok( ! App::QuestionValidator::good_option_placeholders($valid_data), "Checking o
 ok( ! App::QuestionValidator::good_option_tag($valid_data), "Checking option tags.");
 ok( ! App::QuestionValidator::good_question_cols($valid_data), "Checking question row column numbers.");
 ok( ! App::QuestionValidator::good_question_text($valid_data), "Checking question text format.");
+ok( ! App::QuestionValidator::good_feedback_format($valid_data), "Checking question feedback format.");
+ok( ! App::QuestionValidator::good_feedback_text($valid_data), "Checking question feedback text.");
 
 is( validate($valid_data), 0, "Invalid csv correctly invalidated." );
 

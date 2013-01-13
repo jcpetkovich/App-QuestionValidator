@@ -26,7 +26,8 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-If you are looking for a commandline interface, you should look at
+If you are looking for a commandline interface
+ you should look at
 B<question-validator>.
 
 This module supplies the necessary functions for validating learn
@@ -34,7 +35,8 @@ style multiple choice questions.
 
     use App::QuestionValidator;
 
-    my $fields = load_question(IO::File->new('question.csv', 'r'));
+    my $fields = load_question(IO::File->new('question.csv'
+ 'r'));
     if ( "Question OK" eq validate($fields) ) {
         say "Valid!";
     }
@@ -60,16 +62,18 @@ Don't touch these unless you know that you need to.
 =cut
 
 our @TROUBLE_ROWS;
+
 our $ROW_TAG         = 1;
 our $OPTION_VALUE    = 2;
 our $QUESTION_TYPE   = 0;
 our $TYPE_VALUE      = 2;
 our $OPTION_FEEDBACK = 5;
 our $PLACEHOLDER     = 4;
-our $TYPE_ROW        = 0;
-our $TITLE_ROW       = 1;
-our $QUESTION_ROW    = 2;
 our $QUESTION_TEXT   = 2;
+our $FEEDBACK_TEXT   = 2;
+
+## Please see file perltidy.ERR
+our ( $TYPE_ROW, $TITLE_ROW, $QUESTION_ROW, $FEEDBACK_ROW );
 
 =head1 SUBROUTINES/METHODS
 
@@ -133,6 +137,17 @@ sub say_note {
     say_stderr( "note", @error_text );
 }
 
+=head2 row_index
+
+Searches an array of rows for the row number (or numbers) of the row(s) with the desired tag.
+
+=cut
+
+sub row_index {
+    my ( $tag, @array ) = @_;
+    grep { $array[$_]->[$ROW_TAG] =~ /\Q$tag\E/i } 0 .. $#array;
+}
+
 =head2 load_question
 
 Load csv formatted question into memory.
@@ -153,7 +168,10 @@ sub load_question {
         push @$fields, $row;
     }
 
-    # my $fields = $csv->getline_all($fh);
+    ($TYPE_ROW)     = row_index 'NewQuestion',  @$fields;
+    ($TITLE_ROW)    = row_index 'Title',        @$fields;
+    ($QUESTION_ROW) = row_index 'QuestionText', @$fields;
+    ($FEEDBACK_ROW) = row_index 'Feedback',     @$fields;
 
     return $fields;
 }
@@ -320,11 +338,15 @@ sub good_tag_and_size {
 
     @TROUBLE_ROWS = ();
 
+    my $status = 1;
+    unless ( $status &&= defined($ROW_NUM) ) {
+        return $status;
+    }
     my $type_row = $fields->[$ROW_NUM];
 
     # The first row must have $size columns, the first of which must
     # contain the correct tag $tag
-    my $status = @$type_row - 1 == $size && $type_row->[$ROW_TAG] eq $tag;
+    $status = @$type_row - 1 == $size && $type_row->[$ROW_TAG] eq $tag;
     push @TROUBLE_ROWS, $type_row;
     return $status;
 
@@ -456,9 +478,35 @@ sub good_question_cols {
     my ($fields) = @_;
     @TROUBLE_ROWS = ();
 
-    my $status = @{ $fields->[$QUESTION_ROW] } - 1 == 3
+    my $status = 1;
+    unless ( $status &&= defined($QUESTION_ROW) ) {
+        return $status;
+    }
+    $status = @{ $fields->[$QUESTION_ROW] } - 1 == 3
       && $fields->[$QUESTION_ROW][$ROW_TAG] eq "QuestionText";
     push @TROUBLE_ROWS, $fields->[$QUESTION_ROW] unless $status;
+    return $status;
+}
+
+=head2 good_text_block
+
+Checks that a textblock exists in the right place, and that it is
+formatted to accomodate learn's oddities.
+
+=cut
+
+sub good_text_block {
+    my ( $tag_row, $text_col, $fields ) = @_;
+
+    @TROUBLE_ROWS = ();
+
+    my $status = 1;
+
+    unless ( $status &&= defined($tag_row) ) {
+        return $status;
+    }
+    $status = $fields->[$tag_row][$text_col] =~ /\A\n.*\n\z/ms;
+    push @TROUBLE_ROWS, $fields->[$tag_row] unless $status;
     return $status;
 }
 
@@ -470,16 +518,28 @@ multiline input possible.
 =cut
 
 sub good_question_text {
-    my ($fields) = @_;
 
-    @TROUBLE_ROWS = ();
+    good_text_block( $QUESTION_ROW, $QUESTION_TEXT, @_ );
+}
 
-    # Check that the question text has a newline at the very beginning
-    # and at the very end.
+=head2 good_feedback_format
 
-    my $status = $fields->[$QUESTION_ROW][$QUESTION_TEXT] =~ /\A\n.*\n\z/ms;
-    push @TROUBLE_ROWS, $fields->[$QUESTION_ROW] unless $status;
-    return $status;
+Check that the feedback (if present) is properly formatted.
+
+=cut
+
+sub good_feedback_format {
+    good_tag_and_size( $FEEDBACK_ROW, "Feedback", 6, @_ );
+}
+
+=head2 good_feedback_text
+
+Check to see if the feedback text is properly formatted (if it exists).
+
+=cut
+
+sub good_feedback_text {
+    good_text_block( $FEEDBACK_ROW, $FEEDBACK_TEXT, @_ );
 }
 
 =head2 validate
@@ -575,6 +635,18 @@ sub validate {
 
         say_note
 "I suggest putting a newline at the very beginning of your question text, and also at the very end. If you do not put newlines at the beginning and the end of the string, learn will not treat your newlines literally, and will format your question as it sees fit.";
+    }
+
+    unless ( good_feedback_format($fields) ) {
+        say_error
+"Question feedback rows should start with \"Feedback\" and have 6 columns.";
+    }
+    
+    unless ( good_feedback_text($fields) ) {
+        $status = 0;
+
+        say_note
+"I suggest putting a newline at the very beginning of your feedback text, and also at the very end. If you do not put newlines at the beginning and the end of the string, learn will not treat your newlines literally, and will format your feedback as it sees fit.";
     }
 
     return $status;

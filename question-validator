@@ -14,7 +14,7 @@ use autodie;
 
 GetOptions();
 
-my $fh = IO::File->new();
+my $fh = new IO::File();
 
 if ( @ARGV == 0 ) {
     $fh->fdopen(fileno(STDIN),'r');
