@@ -17,20 +17,66 @@ GetOptions();
 my $fh = new IO::File();
 
 if ( @ARGV == 0 ) {
-    $fh->fdopen(fileno(STDIN),'r');
-    my $fields = load_question($fh);
-    validate($fields);
 
-} else {
+    $fh->fdopen( fileno(STDIN), 'r' );
+
+    my $questions = 0;
+    my $status    = 1;
+    my $fields;
+    my $lastrow;
+    while ( $fields = load_question($fh) ) {
+
+        # If we caught the start of another question at the end of the
+        # previous one add the header to the question's fields
+        if ($lastrow) {
+            unshift @$fields, $lastrow;
+            undef $lastrow;
+        }
+
+        # If we caught the start of another question at the end of
+        # this question, store it for the next iteration
+        if ( $fields->[$#$fields][$App::QuestionValidator::ROW_TAG] =~
+            /newquestion/i )
+        {
+            $lastrow = pop @$fields;
+        }
+
+        $questions++;
+        $status &&= validate($fields);
+    }
+
+    unless ($status) {
+        say STDERR $questions > 1 ? "All questions " : "Question ",
+          "did not pass validation.";
+        exit 1;
+    }
+    else {
+        say " ok";
+    }
+
+}
+else {
+    my $status = 1;
+
     for (@ARGV) {
-        if (-r $_) {
-            $fh->open($_, 'r');
+        if ( -r $_ ) {
+            $fh->open( $_, 'r' );
 
             $App::QuestionValidator::FILENAME = $_;
-            say "Opening file $_ for scrutiny:";
-            my $fields = load_question($fh);
-            validate($fields);
+            print "Opening file $_ for scrutiny:";
+            my $fields;
+            while ( $fields = load_question($fh) ) {
+                $status &&= validate($fields);
+            }
         }
+    }
+    unless ($status) {
+        say STDERR @ARGV > 1 ? "All questions " : "Question ",
+          "did not pass validation.";
+        exit 1;
+    }
+    else {
+        say " ok";
     }
 }
 

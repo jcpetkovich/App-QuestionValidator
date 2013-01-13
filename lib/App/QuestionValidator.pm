@@ -40,11 +40,11 @@ style multiple choice questions.
 
 =head1 EXPORT
 
-load_question validate
+load_question validate process_row_indexes
 
 =cut
 
-our @EXPORT   = qw( load_question validate );
+our @EXPORT   = qw( load_question validate process_row_indexes );
 our $FILENAME = 'question-validator';
 
 =head1 GLOBALS
@@ -154,17 +154,39 @@ sub load_question {
     my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
 
     my $fields = [];
+
+    my $pos;
     while ( my $row = $csv->getline($fh) ) {
         unshift @$row, $fh->input_line_number();
+        if ( defined($pos)
+            && $row->[$ROW_TAG] =~ /newquestion/i )
+        {
+            # Go back to before this line in the file stream. Wont
+            # work on stdin
+            unless ( seek $fh, $pos, 0 ) {
+                push @$fields, $row;
+            }
+            last;
+        }
         push @$fields, $row;
+        $pos = tell $fh;
     }
 
+    return @$fields == 0 ? undef : $fields;
+}
+
+=head2 process_row_indexes
+
+Find the row indexes for the question's various fields.
+
+=cut
+
+sub process_row_indexes {
+    my ($fields) = @_;
     ($TYPE_ROW)     = row_index 'NewQuestion',  @$fields;
     ($TITLE_ROW)    = row_index 'Title',        @$fields;
     ($QUESTION_ROW) = row_index 'QuestionText', @$fields;
     ($FEEDBACK_ROW) = row_index 'Feedback',     @$fields;
-
-    return $fields;
 }
 
 =head2 is_multiple_choice
@@ -531,6 +553,8 @@ Validate the supplied question.
 
 sub validate {
     my ($fields) = @_;
+    
+    process_row_indexes($fields);
 
     my $status = 1;
 

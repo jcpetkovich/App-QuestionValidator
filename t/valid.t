@@ -16,6 +16,8 @@ use IO::File;
 my $fh = new IO::File 't/valid.csv', 'r';
 my $valid_data = load_question($fh);
 
+process_row_indexes($valid_data);
+
 # Tests associated with the rules
 ok( App::QuestionValidator::is_multiple_choice($valid_data), "Multiple choice check." );
 is( App::QuestionValidator::count_answers($valid_data),   4, "Enforce 4 answers." );
