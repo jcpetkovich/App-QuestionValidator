@@ -8,10 +8,6 @@ use Carp;
 use Text::CSV;
 use Exporter 'import';
 
-# test.c: In function ‘main’:
-# test.c:7:5: error: ‘printhi’ undeclared (first use in this function)
-# test.c:7:5: note: each undeclared identifier is reported only once for each function it appears in
-
 =head1 NAME
 
 App::QuestionValidator - Validates learn-style multiplechoice questions.
@@ -35,8 +31,8 @@ style multiple choice questions.
 
     use App::QuestionValidator;
 
-    my $fields = load_question(IO::File->new('question.csv'
- 'r'));
+    my $fh = IO::File->new('question.csv' 'r')
+    my $fields = load_question($fh);
     if ( "Question OK" eq validate($fields) ) {
         say "Valid!";
     }
@@ -48,11 +44,7 @@ load_question validate
 
 =cut
 
-our @EXPORT    = qw( load_question validate );
-our @EXPORT_OK = qw( is_multiple_choice count_answers count_correct
-  count_incorrect validate_answer_points good_type good_title
-  good_option_format good_question_text non_empty_feedback
-  good_option_cols good_option_placeholders good_option_tag );
+our @EXPORT   = qw( load_question validate );
 our $FILENAME = 'question-validator';
 
 =head1 GLOBALS
@@ -72,7 +64,6 @@ our $PLACEHOLDER     = 4;
 our $QUESTION_TEXT   = 2;
 our $FEEDBACK_TEXT   = 2;
 
-## Please see file perltidy.ERR
 our ( $TYPE_ROW, $TITLE_ROW, $QUESTION_ROW, $FEEDBACK_ROW );
 
 =head1 SUBROUTINES/METHODS
@@ -475,17 +466,7 @@ Check that the question text row has the proper number of columns.
 =cut
 
 sub good_question_cols {
-    my ($fields) = @_;
-    @TROUBLE_ROWS = ();
-
-    my $status = 1;
-    unless ( $status &&= defined($QUESTION_ROW) ) {
-        return $status;
-    }
-    $status = @{ $fields->[$QUESTION_ROW] } - 1 == 3
-      && $fields->[$QUESTION_ROW][$ROW_TAG] eq "QuestionText";
-    push @TROUBLE_ROWS, $fields->[$QUESTION_ROW] unless $status;
-    return $status;
+    good_tag_and_size( $QUESTION_ROW, "QuestionText", 3, @_ );
 }
 
 =head2 good_text_block
@@ -641,7 +622,7 @@ sub validate {
         say_error
 "Question feedback rows should start with \"Feedback\" and have 6 columns.";
     }
-    
+
     unless ( good_feedback_text($fields) ) {
         $status = 0;
 

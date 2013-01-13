@@ -4,9 +4,9 @@ how to fix the problems found in the question file.
 
 Rules which must be followed by the questions.
   - All questions must be multiple choice questions with four possible answers.
-  - At most one answer must give full points.
-  - At least two answers must give zero points.
-  - One question may give zero to fifty percent of the points.
+  - At most one answer must give full (100%) marks.
+  - At least two answers must give zero (0%) marks.
+  - One question may give zero to fifty percent of the marks.
   - The question must be compelling, and the right answer should be non-obvious.
 
 # DEPENDENCIES 
