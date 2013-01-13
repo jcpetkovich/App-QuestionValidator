@@ -14,14 +14,14 @@ use autodie;
 
 GetOptions();
 
-my $fh = new IO::File();
+my $fh        = new IO::File();
+my $questions = 0;
+my $status    = 1;
 
 if ( @ARGV == 0 ) {
 
     $fh->fdopen( fileno(STDIN), 'r' );
 
-    my $questions = 0;
-    my $status    = 1;
     my $fields;
     my $lastrow;
     while ( $fields = load_question($fh) ) {
@@ -45,46 +45,39 @@ if ( @ARGV == 0 ) {
         $status &&= validate($fields);
     }
 
-    unless ($status) {
-        say STDERR $questions > 1 ? "All questions " : "Question ",
-          "did not pass validation.";
-        exit 1;
-    }
-    else {
-        say " ok";
-    }
+    say "ok" if $status;
 
 }
 else {
-    my $status = 1;
 
     for (@ARGV) {
         if ( -r $_ ) {
             $fh->open( $_, 'r' );
 
             $App::QuestionValidator::FILENAME = $_;
-            print "Opening file $_ for scrutiny:";
+            print "Opening file $_ for scrutiny: ";
             my $fields;
             while ( $fields = load_question($fh) ) {
+                $questions++;
                 $status &&= validate($fields);
             }
+
+            say "ok" if $status;
         }
     }
-    unless ($status) {
-        say STDERR @ARGV > 1 ? "All questions " : "Question ",
-          "did not pass validation.";
-        exit 1;
-    }
-    else {
-        say " ok";
-    }
+}
+
+unless ($status) {
+    say STDERR $questions > 1 ? "All questions " : "Question ",
+      "did not pass validation.";
+    exit 1;
 }
 
 __END__
 
 =head1 NAME
 
-question-validator - Validate learn multiple choice questions.
+question-validator - Validate learn multiple choice questions from a list of files or STDIN.
 
 =head1 SYNOPSIS
 
@@ -95,10 +88,11 @@ B<question-validator> [options] [files]
 =head1 DESCRIPTION
 
 B<question-validator> takes a list of files to validate one by one, or
-can have a question csv piped to it from the commandline.
+can have a question csv piped to it from the commandline. Each file
+may have more than one question.
 
-Keep running the validator on the question and fix the first error
-that appears until B<question-validator> returns no errors.
+Keep running the validator on the question file and fix the first
+error that appears until B<question-validator> returns no errors.
 
 =head1 AUTHOR
 

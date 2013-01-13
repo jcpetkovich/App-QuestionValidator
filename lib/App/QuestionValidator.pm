@@ -553,7 +553,7 @@ Validate the supplied question.
 
 sub validate {
     my ($fields) = @_;
-    
+
     process_row_indexes($fields);
 
     my $status = 1;
