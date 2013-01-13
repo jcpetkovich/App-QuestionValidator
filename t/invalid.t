@@ -11,6 +11,7 @@
 
 use Test::More tests => 16;
 use App::QuestionValidator;
+use IO::File;
 
 my $fh = new IO::File 't/invalid.csv', 'r';
 my $valid_data = load_question($fh);
