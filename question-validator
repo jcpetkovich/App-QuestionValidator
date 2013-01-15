@@ -14,12 +14,12 @@ use autodie;
 
 GetOptions();
 
-my $fh        = new IO::File();
+my $fh;
 my $questions = 0;
 my $status    = 1;
 
 if ( @ARGV == 0 ) {
-
+    $fh = new IO::File();
     $fh->fdopen( fileno(STDIN), 'r' );
 
     my $fields;
@@ -52,6 +52,7 @@ else {
 
     for (@ARGV) {
         if ( -r $_ ) {
+            $fh = new IO::File();
             $fh->open( $_, 'r' );
 
             $App::QuestionValidator::FILENAME = $_;

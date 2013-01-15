@@ -508,7 +508,7 @@ sub good_text_block {
     unless ( $status &&= defined($tag_row) ) {
         return $status;
     }
-    $status = $fields->[$tag_row][$text_col] =~ /\A\n.*\n\z/ms;
+    $status = $fields->[$tag_row][$text_col] =~ /\A\R.*\R\z/ms;
     push @TROUBLE_ROWS, $fields->[$tag_row] unless $status;
     return $status;
 }
@@ -636,7 +636,6 @@ sub validate {
     }
 
     unless ( good_question_text($fields) ) {
-        $status = 0;
 
         say_note
 "I suggest putting a newline at the very beginning of your question text, and also at the very end. If you do not put newlines at the beginning and the end of the string, learn will not treat your newlines literally, and will format your question as it sees fit.";
@@ -648,7 +647,6 @@ sub validate {
     }
 
     unless ( good_feedback_text($fields) ) {
-        $status = 0;
 
         say_note
 "I suggest putting a newline at the very beginning of your feedback text, and also at the very end. If you do not put newlines at the beginning and the end of the string, learn will not treat your newlines literally, and will format your feedback as it sees fit.";
