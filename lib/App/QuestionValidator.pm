@@ -353,6 +353,7 @@ sub good_tag_and_size {
 
     my $status = 1;
     unless ( $status &&= defined($ROW_NUM) ) {
+        push @TROUBLE_ROWS, $fields->[row_index($tag, @$fields)];
         return $status;
     }
     my $type_row = $fields->[$ROW_NUM];
