@@ -78,7 +78,7 @@ Handles multiline pieces of csv rows correctly.
 
 sub row_to_string {
     my ($row) = @_;
-    my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
+    my $csv = Text::CSV->new( { binary => 1 } );
     $csv->combine(@$row);
     return $csv->string();
 }
@@ -151,7 +151,7 @@ rows.
 sub load_question {
     my ($fh) = @_;
 
-    my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
+    my $csv = Text::CSV->new( { binary => 1 } );
 
     my $fields = [];
 
@@ -166,12 +166,21 @@ sub load_question {
             unless ( seek $fh, $pos, 0 ) {
                 push @$fields, $row;
             }
+
             # Adjust line counter if we could seek backwards
             $.--;
             last;
         }
         push @$fields, $row;
         $pos = tell $fh;
+    }
+
+    if ( "" . $csv->error_diag() ) {
+        say STDERR "$FILENAME:", $., ":0: error: ", "" . $csv->error_diag(),
+          ", line number may not be accurate";
+        say STDERR "$FILENAME:", $., ":0: error: ",
+          "Potentially offending input: " . $csv->error_input();
+        exit 1;
     }
 
     return @$fields == 0 ? undef : $fields;
@@ -355,7 +364,7 @@ sub good_tag_and_size {
 
     my $status = 1;
     unless ( $status &&= defined($ROW_NUM) ) {
-        push @TROUBLE_ROWS, $fields->[row_index($tag, @$fields)];
+        push @TROUBLE_ROWS, $fields->[ row_index( $tag, @$fields ) ];
         return $status;
     }
     my $type_row = $fields->[$ROW_NUM];
