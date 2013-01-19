@@ -83,12 +83,6 @@ sub row_to_string {
     return $csv->string();
 }
 
-=head2 print_stderr
-
-This will print to stderr 
-
-=cut
-
 =head2 say_stderr
 
 Function that prints gcc style messages to stderr.
@@ -325,8 +319,7 @@ sub validate_answer_points {
 
 =head2 non_empty_feedback
 
-This will ensure that no more than 2 options have a value of greater
-than 50% of the marks.
+This will ensure that all options have feedback.
 
 =cut
 
@@ -340,7 +333,7 @@ sub non_empty_feedback {
 
     for my $option (@options) {
 
-        my $check = not( $option->[$OPTION_FEEDBACK] || '' ) =~ /^\s*$/;
+        my $check = !( ( $option->[$OPTION_FEEDBACK] || '' ) =~ /^\s*$/ );
         $status &&= $check;
         unless ($check) {
             push @TROUBLE_ROWS, $option;
@@ -358,21 +351,28 @@ by a simple learn entry.
 =cut
 
 sub good_tag_and_size {
-    my ( $ROW_NUM, $tag, $size, $fields ) = @_;
+    my ( $row_num, $tag, $size, $fields ) = @_;
 
     @TROUBLE_ROWS = ();
 
     my $status = 1;
-    unless ( $status &&= defined($ROW_NUM) ) {
-        push @TROUBLE_ROWS, $fields->[ row_index( $tag, @$fields ) ];
-        return $status;
+
+    my $target_row;
+    if ( ref($row_num) eq 'ARRAY' ) {
+        $target_row = $row_num;
     }
-    my $type_row = $fields->[$ROW_NUM];
+    else {
+        unless ( $status &&= defined($row_num) ) {
+            push @TROUBLE_ROWS, $fields->[ row_index( $tag, @$fields ) ];
+            return $status;
+        }
+        $target_row = $fields->[$row_num];
+    }
 
     # The first row must have $size columns, the first of which must
     # contain the correct tag $tag
-    $status = @$type_row - 1 == $size && $type_row->[$ROW_TAG] eq $tag;
-    push @TROUBLE_ROWS, $type_row;
+    $status = @$target_row - 1 == $size && $target_row->[$ROW_TAG] eq $tag;
+    push @TROUBLE_ROWS, $target_row;
     return $status;
 
 }
@@ -414,17 +414,10 @@ sub good_option_cols {
     # Correct format until proven guilty... er... I mean correct.
     my $status = 1;
 
-    my @options = grep { $_->[$ROW_TAG] eq "Option" } @$fields;
+    my @options = grep { $_->[$ROW_TAG] =~ /Option/i } @$fields;
 
     for my $option (@options) {
-
-        # The first row must have 5 columns, the first of which must
-        # contain Option
-        my $check = @$option - 1 == 5;
-        $status &&= $check;
-        unless ($check) {
-            push @TROUBLE_ROWS, $option;
-        }
+        $status &&= good_tag_and_size( $option, "Option", 5, @_ );
     }
 
     return $status;
