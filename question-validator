@@ -1,8 +1,6 @@
-#!/usr/bin/perl -w
-# question-validator --- Checks if a submitted question is valid.
-# Author: Jean-Christophe Petkovich <jcpetkovich@gmail.com>
-# Created: 05 Jan 2013
-# Version: 0.01
+#!/usr/bin/perl -w question-validator --- Checks if a submitted
+#question is valid.  Author: Jean-Christophe Petkovich
+#<jcpetkovich@gmail.com> Created: 05 Jan 2013 Version: 0.01
 
 use v5.12;
 use warnings;

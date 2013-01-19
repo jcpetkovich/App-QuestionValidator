@@ -162,10 +162,12 @@ sub load_question {
             && $row->[$ROW_TAG] =~ /newquestion/i )
         {
             # Go back to before this line in the file stream. Wont
-            # work on stdin
+            # work on stdin so we have to store the row in that case
             unless ( seek $fh, $pos, 0 ) {
                 push @$fields, $row;
             }
+            # Adjust line counter if we could seek backwards
+            $.--;
             last;
         }
         push @$fields, $row;
