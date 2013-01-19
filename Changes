@@ -1,5 +1,14 @@
 Revision history for App-QuestionValidator
 
-0.01    Date/time
+0.02    19 Jan 2013
+        - This version should be compatible with Perl 5.12.*
+        - Most errors should have the offending line pointed out
+          correctly now.
+        - Text::CSV errors should be printed using the same syntax as
+          the rest of the errors.
+        - Can handle multiple questions from STDIN, and multiple
+          questions from one file.
+
+0.01    05 Jan 2013
         First version, released on an unsuspecting world.
 
