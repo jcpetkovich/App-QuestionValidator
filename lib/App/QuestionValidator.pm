@@ -537,7 +537,10 @@ Check that the feedback (if present) is properly formatted.
 =cut
 
 sub good_feedback_format {
-    good_tag_and_size( $FEEDBACK_ROW, "Feedback", 6, @_ );
+    if ($FEEDBACK_ROW) {
+        return good_tag_and_size( $FEEDBACK_ROW, "Feedback", 6, @_ );
+    }
+    return 1;
 }
 
 =head2 good_feedback_text
