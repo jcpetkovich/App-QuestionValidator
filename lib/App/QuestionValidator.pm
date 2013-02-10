@@ -277,7 +277,7 @@ sub count_correct {
     $fields;
 
     shift @TROUBLE_ROWS;
-    return $r;
+    return $r ? $r : 0;
 }
 
 =head2 count_incorrect
@@ -292,8 +292,12 @@ sub count_incorrect {
 
     @TROUBLE_ROWS = ();
 
-    count_row_pattern { $_->[$ROW_TAG] eq "Option" && $_->[$OPTION_VALUE] == 0 }
+    my $r = count_row_pattern {
+        $_->[$ROW_TAG] eq "Option" && $_->[$OPTION_VALUE] == 0;
+    }
     $fields;
+
+    return $r ? $r : 0;
 }
 
 =head2 validate_answer_points
