@@ -169,7 +169,9 @@ sub load_question {
         $pos = tell $fh;
     }
 
-    if ( "" . $csv->error_diag() ) {
+    if ( "" . $csv->error_diag()
+        && not "" . $csv->error_diag =~ /End of data in parsing input stream/ )
+    {
         say STDERR "$FILENAME:", $., ":0: error: ", "" . $csv->error_diag(),
           ", line number may not be accurate";
         say STDERR "$FILENAME:", $., ":0: error: ",
