@@ -1,0 +1,85 @@
+NewQuestion,MC,
+Title,< Memory types>,
+QuestionText,< Which one of the following is a volatile memory?>,
+Option,<0>,<ROM >,,<Incorrect answer. ROM is a non-volatile memory>
+Option,<100>,<RAM>,,<Correct Answer. Watch video 1_ES_hard-01.mp4>
+Option,<0>,<EPROM>,,< Incorrect answer. EROM is a non-volatile memory >
+Option,<0>,<EEPROM >,,< Incorrect answer. EEPROM is a non-volatile memory>
+Feedback,< Understanding of difference b/w Volatile and Non-Volatile memories>,,
+
+
+
+
+
+
+
+
+
+
+
+
+
+NewQuestion,MC,
+Title,<Embedded System>,
+QuestionText,< Choose one of the following which is not a property of an Embedded system (ES): >,
+Option,<100>,< Built for multi-purpose>,,<Correct. Refer to ES_is_hard-postlecture, Slide 9>
+Option,<0>,< Heterogenity >,,<Incorrect Answer. Heterogeneity is a property of ES>
+Option,<0>,< Mass produced >,,< Incorrect Answer. Mass produced  is a property of ES >
+Option,<0>,< Tightly coupled to the physical world >,,< Incorrect Answer. Tightly coupled to the physical world is a property of ES >
+Feedback,<Properties of Embedded system>,,,,
+
+
+
+
+
+
+
+
+
+
+
+NewQuestion,MC,
+Title,<Historic Evolution>,
+QuestionText,< Which of the following values represents Human-Computer relationship for era, Personal's computing & Internet (80's-90's)?>,
+
+Option,<0>,<0>,,<Incorrect answer. 0 represents Physical computing (late 90’s) >
+Option,<0>,<∞>,,< Incorrect answer. ∞ represents Mainframe Computing (60’s-70’s)>
+Option,<100>,<1>,,<Correct. Refer to ES_is_hard-postlecture, Slide 17 >
+Option,<0>,<2>,,< Incorrect answer. >
+Feedback,<Relationship:Human/Computer≅ value >,,,,
+
+
+
+
+
+
+
+
+NewQuestion,MC,
+Title,<Bugging issues>,
+QuestionText,< Choose the option(s) to prevent a Counter overflow>,
+Option,<50>,< Know the range of inputs>,,<Correct answer. Watch video 1_ES_hard-02.mp4>
+Option,<50>,< Use compiler flags>,,< Correct answer. Watch video 1_ES_hard-02.mp4>
+Option,<0>,< Appropriate header file>,,<Incorrect answer. Not a factor for Counter Overflow>
+Option,<0>,< Incorrect symbols>,,< Incorrect answer. Not a factor for Counter Overflow>
+Feedback,<Causes of Counter Overflow >,,,,
+
+
+
+
+
+
+
+
+
+
+
+NewQuestion,MC,
+Title,<Autonomous Driving>,
+QuestionText,< What is one of the greatest challenges for a fully autonomous (level 5) vehicle?>,
+Option,<0>,<Better sensors>,,<Incorrect answer. Not a challenge for level 5 autonomous vehicles>
+Option,<100>,<Adaptive softwares>,,<Correct answer. Adaptive decision-making software. Watch video 1_ES_hard-03.mp4. Refer to ES_is_hard-postlecture, Slide 88 >
+Option,<0>,<Advanced actuators>,,< Incorrect answer. Not a challenge for level 5 autonomous vehicles >
+Option,<0>,<Wide angle cameras >,,< Incorrect answer. Not a challenge for level 5 autonomous vehicles >
+Feedback,< Challenges of level 5 Autonomous vehicles>,,,,
+
